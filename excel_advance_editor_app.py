@@ -198,10 +198,6 @@ with tab3:
                     if df is None:
                         continue
 
-                    # if enable_preview_drop:
-                    #     st.markdown(f"### Preview Before Dropping: `{file.name}`")
-                    #     st.dataframe(df.head())
-
                     df_dropped = df.drop(columns=[c for c in columns_to_drop if c in df.columns], errors="ignore")
                     st.markdown(
                         f"### Processed File: `{file.name}` "
@@ -219,7 +215,7 @@ with tab3:
                     )
 
 # ==========================================================
-# Tab 4: View Selected Columns (row count control)
+# Tab 4: View Selected Columns (fixed for full download)
 # ==========================================================
 with tab4:
     uploaded_file_view = st.file_uploader(
@@ -242,19 +238,22 @@ with tab4:
             selected_columns = st.multiselect("Select columns to view", list(df.columns), key="view_cols")
             num_rows = st.number_input("Number of rows to display", min_value=1, value=5, key="view_rows")
 
+            # Preview limited rows
             if selected_columns:
                 view_df = df[selected_columns].head(num_rows)
+                full_df = df[selected_columns]   # Full data for download
             else:
                 view_df = df.head(num_rows)
+                full_df = df                   # Full data for download
 
-            st.markdown("### First 5 rows after selecting columns")
-            st.dataframe(view_df)  # Show after editing
+            st.markdown("### Preview after selecting columns")
+            st.dataframe(view_df)
 
+            # Download full dataframe of selected columns
             st.download_button(
-                "⬇️ Download Selected View",
-                to_excel_bytes(view_df),
+                "⬇️ Download Selected Columns (Full Data)",
+                to_excel_bytes(full_df),
                 "view_selected_columns.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 key="dl_view"
             )
-
