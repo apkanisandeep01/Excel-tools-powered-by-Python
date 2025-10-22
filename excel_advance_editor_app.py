@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import zipfile
 from io import BytesIO
+from datetime import datetime
 
 # =========================
 # Page Config
@@ -99,10 +100,16 @@ with tab1:
                 combined_df = pd.concat(dfs, ignore_index=True)
                 st.success(f"✅ Combined {len(dfs)} files/sheets into one dataframe.")
                 st.dataframe(combined_df.head(10))
+            
+                # Create timestamp
+                timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                filename = f"combined_data_{timestamp}.xlsx"
+            
+                # Provide download button with renamed file
                 st.download_button(
                     "⬇️ Download Combined Excel",
                     to_excel_bytes(combined_df),
-                    "combined_data.xlsx",
+                    file_name=filename,
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
 
