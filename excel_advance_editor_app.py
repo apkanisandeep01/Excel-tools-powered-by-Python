@@ -138,7 +138,7 @@ with tab2:
 
             split_column = st.selectbox("Select column to split by", df.columns, key="split_column")
             if split_column:
-                groups = dict(tuple(df.groupby(split_column, dropna=False)))
+                groups = dict(tuple(df.groupby(split_column, dropna=True)))
                 st.info(f"Found **{len(groups)}** group(s) in “{split_column}”.")
 
                 # Individual group previews & downloads
