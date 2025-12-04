@@ -258,7 +258,7 @@ with tab4:
 
             # Download full dataframe of selected columns
             st.download_button(
-                "⬇️ Download Selected Columns (Full Data)",
+                "⬇️ Download Excel",
                 to_excel_bytes(full_df),
                 "view_selected_columns.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
