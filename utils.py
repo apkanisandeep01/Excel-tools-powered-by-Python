@@ -32,9 +32,9 @@ def show_preview(df: pd.DataFrame, n: int = 5):
 def show_metrics(df: pd.DataFrame):
     st.markdown(
         f"""<div class="metric-row">
-            <div class="metric-chip">📏 {len(df):,} Rows</div>
-            <div class="metric-chip">📐 {len(df.columns)} Columns</div>
-            <div class="metric-chip">💾 ~{df.memory_usage(deep=True).sum() // 1024} KB</div>
+            <div class="metric-chip">{len(df):,} Rows</div>
+            <div class="metric-chip">{len(df.columns)} Columns</div>
+            <div class="metric-chip">~{df.memory_usage(deep=True).sum() // 1024} KB</div>
         </div>""",
         unsafe_allow_html=True,
     )
@@ -54,7 +54,7 @@ def download_buttons(df: pd.DataFrame, stem: str):
     c1, c2 = st.columns(2)
     with c1:
         st.download_button(
-            "📥 Download as Excel",
+            "Download as Excel",
             df_to_excel_bytes(df),
             _timestamped_name(stem, "xlsx"),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -62,7 +62,7 @@ def download_buttons(df: pd.DataFrame, stem: str):
         )
     with c2:
         st.download_button(
-            "📥 Download as CSV",
+            "Download as CSV",
             df_to_csv_bytes(df),
             _timestamped_name(stem, "csv"),
             "text/csv",
