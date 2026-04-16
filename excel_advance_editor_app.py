@@ -402,7 +402,8 @@ TOOLS = {
     "Merge Workbook":       "merge_workbook",
     "Split Workbook":       "split_workbook",
     "Merge All Sheets":     "append_sheets",
-    "Join / Merge":         "pandas_merge",
+    "Join - Merge":         "pandas_merge",
+    'Aggregate':            'pandas_groupby'
 }
 
 with st.sidebar:
@@ -427,16 +428,17 @@ with st.sidebar:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-#  HELPERS
+#  HELPERS HEADER
 # ═══════════════════════════════════════════════════════════════════════════
 TOOL_META = {
-    "merge_flat":     ("", "Merge Files",      "Helps in merging the multiple excel files in one single file"),
-    "split_col":      ("", "Split into Many Excel",              "Splits into multiple excels based on the input values"),
-    "delete_cols":    ("", "Delete Columns",               "Remove the Columns by selecting from dropdown Download only necessary files"),
-    "merge_workbook": ("", "Merge Files into Workbook",   "Each file becomes a sheet inside one Excel workbook"),
-    "split_workbook": ("", "Split Workbook to Excels",       "Each sheet  gets exported as own file"),
-    "append_sheets":  ("", "Append All Sheets to one Sheet",      "Stack all tabs from multiple workbooks into one sheet"),
-    "pandas_merge":   ("", "SQL-Style Join / Merge",       "Match rows across two files by key columns (LEFT / INNER / OUTER)"),
+    "merge_flat":     ("", "Merge Files",                       "Helps in merging the multiple excel files in one single file"),
+    "split_col":      ("", "Split into Many Excel",             "Splits into multiple excels based on the input values"),
+    "delete_cols":    ("", "Delete Columns",                    "Remove the Columns by selecting from dropdown Download only necessary files"),
+    "merge_workbook": ("", "Merge Files into Workbook",         "Each file becomes a sheet inside one Excel workbook"),
+    "split_workbook": ("", "Split Workbook to Excels",          "Each sheet  gets exported as own file"),
+    "append_sheets":  ("", "Append All Sheets to one Sheet",    "Stack all tabs from multiple workbooks into one sheet"),
+    "pandas_merge":   ("", "SQL-Style Join / Merge",            "Match rows across two files by key columns (LEFT / INNER / OUTER)"),
+    "pandas_groupby":  ("", "Generate Abstact with clicks",     "Abstact generator like Pivoting tables in excel with clicks"),
 }
 
 def page_header(key):
@@ -878,4 +880,59 @@ elif tool == "pandas_merge":
             st.error(f"❌  Merge failed: {e}")
             st.info("💡  Tip: Make sure join key columns have matching values across both files.")
             
-            
+
+elif tool == 'pandas_groupby':
+    page_header("pandas_groupby")
+    op_box('Helps in Summering the tables into pescribted format')
+    file = st.file_uploader("📂  Upload exactly 2 Excel / CSV files", type=["xlsx","xls","csv"],
+                              accept_multiple_files=False, key="ag_upload")
+    
+    if not file:
+        st.info(" 👆  Upload  file to get started.")
+        st.stop()
+    
+    header_row = st.number_input("📌  Header row number", min_value=1, max_value=20, value=1, key="ag_hdr")
+    sep()
+    
+    try:
+        df = read_excel_with_header(file, header_row)
+        
+    except Exception as e:
+        st.error(f"❌  Cannot read file: {e}")
+        st.stop()
+        
+    with st.expander("Preview of uploaded file (top 5 rows)", expanded=True):
+        show_preview(df.head())
+    sep()
+    try:
+        columns = df.columns.tolist()
+        group_cols = st.multiselect("Select GroupBy Columns", columns)
+        agg_cols = st.multiselect("Select Columns to Aggregate", columns)
+        agg_func = st.multiselect(
+        "Select Aggregation Functions",
+                    ["sum", "mean", "min", "max", "count"])
+        
+        if st.button("Run Abstract"):
+            if not group_cols or not agg_cols or not agg_func:
+                st.warning("Please select all required options")
+                
+            else:
+                try:
+                    agg_dict = {col: agg_func for col in agg_cols}
+
+                    result = df.groupby(group_cols).agg(agg_dict)
+
+                    # Flatten multi-index columns
+                    result.columns = ['_'.join(col) for col in result.columns]
+                    result = result.reset_index()
+
+                    st.subheader("✅ Result")
+                    show_metrics(result)
+                    st.dataframe(result)
+                    download_buttons(result, "Abstract")
+                except Exception as e:
+                    st.error(f"Error: {e}")
+    except Exception as e:
+        st.error(f"❌  Cannot read file: {e}")
+        st.stop()
+        
