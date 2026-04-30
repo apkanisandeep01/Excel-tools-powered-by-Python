@@ -21,7 +21,7 @@ def df_to_excel_bytes(df: pd.DataFrame) -> bytes:
 
 
 def df_to_csv_bytes(df: pd.DataFrame) -> bytes:
-    return df.to_csv(index=False).encode("utf-8")
+    return df.to_csv(index=False).encode("utf-8-sig")
 
 
 def show_preview(df: pd.DataFrame, n: int = 5):
