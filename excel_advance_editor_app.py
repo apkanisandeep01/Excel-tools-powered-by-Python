@@ -117,7 +117,7 @@ section[data-testid="stSidebar"] ~ div { background: #000000 !important; }
 
 /* ── MAIN CONTENT AREA ── */
 [data-testid="block-container"] {
-    padding: 28px 40px !important;
+    padding: 28px 40px 90px 40px !important;
     max-width: 1100px !important;
 }
 
@@ -395,6 +395,58 @@ div[data-testid="stAlertContainer"][data-baseweb="notification"][kind="error"] {
 # ═══════════════════════════════════════════════════════════════════════════
 #  SIDEBAR
 # ═══════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FIXED FOOTER — LOADS AS SOON AS THE APP OPENS
+# ═══════════════════════════════════════════════════════════════════════════
+
+st.markdown("""
+<style>
+.app-footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    min-height: 52px;
+    background: #0a0a0a;
+    border-top: 1px solid #2a2a2a;
+    color: #ffffff !important;
+    text-align: center;
+    padding: 14px 16px;
+    font-size: 14px;
+    font-weight: 900;
+    z-index: 999999;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.app-footer a {
+    color: #a78bfa !important;
+    text-decoration: none !important;
+    font-weight: 900 !important;
+    margin: 0 8px;
+}
+
+.app-footer a:hover {
+    color: #06b6d4 !important;
+    text-decoration: underline !important;
+}
+</style>
+
+<div class="app-footer">
+    © 2026 APKANI SANDEEP KUMAR &nbsp;•&nbsp; Python Powered Excel &nbsp;|&nbsp;
+    <a href="https://apkanisandeep01.github.io/my-portfolio/" target="_blank">Portfolio</a>
+    <span>&nbsp;|&nbsp;</span>
+    <a href="https://github.com/apkanisandeep01" target="_blank">GitHub</a>
+    <span>&nbsp;|&nbsp;</span>
+    <a href="https://www.linkedin.com/in/sandeep-data-analyst-uk/" target="_blank">LinkedIn</a>
+</div>
+""", unsafe_allow_html=True)
+
+
 TOOLS = {
     "Merge Excels":         "merge_flat",
     "Split into Excels":    "split_col",
@@ -868,10 +920,25 @@ elif tool == "pandas_merge":
 
     if st.button("RUN MERGE", key="pm_btn"):
         try:
+            # rename_map = {rk: lk for lk, rk in key_pairs if lk != rk}
+            # right_work = right_df.rename(columns=rename_map)
+            # join_cols  = [lk for lk, rk in key_pairs]
+            # result     = pd.merge(left_df, right_work, on=join_cols, how=HOW_MAP[how_choice])
+            for lk, rk in key_pairs:
+                left_df[lk] = left_df[lk].astype(str).str.strip().str.lower()
+                right_df[rk] = right_df[rk].astype(str).str.strip().str.lower()
+
+            # Rename right-side join columns to match left-side column names
             rename_map = {rk: lk for lk, rk in key_pairs if lk != rk}
             right_work = right_df.rename(columns=rename_map)
-            join_cols  = [lk for lk, rk in key_pairs]
-            result     = pd.merge(left_df, right_work, on=join_cols, how=HOW_MAP[how_choice])
+
+            # Join using the cleaned columns
+            join_cols = [lk for lk, rk in key_pairs]
+
+            result = pd.merge(
+                left_df,right_work,on=join_cols,how=HOW_MAP[how_choice]
+            )
+            
             st.success(f"✅  Merge complete — **{len(result):,} rows** in result!")
             show_metrics(result)
             st.dataframe(result, use_container_width=True)
